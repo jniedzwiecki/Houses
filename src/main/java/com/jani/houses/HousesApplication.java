@@ -8,7 +8,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -18,6 +21,7 @@ import static com.jani.houses.Teaser.teaser;
 import static io.vavr.API.Try;
 
 @SpringBootApplication
+@EnableScheduling
 public class HousesApplication {
 
     private static final String DATABASE = "jdbc:mysql://localhost/houses?serverTimezone=CET";
@@ -34,8 +38,11 @@ public class HousesApplication {
     private static final String MAX = "max";
 
     public static void main(String[] args) {
-//        SpringApplication.run(HousesApplication.class, args);
+        SpringApplication.run(HousesApplication.class, args);
+    }
 
+    @Scheduled(fixedRate = 600000)
+    static void browse() {
         maxPageIndex()
             .peek(maxIndex ->
                 Stream.rangeClosed(1, maxIndex)
@@ -45,7 +52,6 @@ public class HousesApplication {
                     .forEach(Try::get)
             )
             .getOrElseThrow(() -> new IllegalStateException("Could not download main document."));
-
     }
 
     private static Option<Integer> maxPageIndex() {
