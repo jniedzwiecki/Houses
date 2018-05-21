@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -39,9 +40,8 @@ public class HousesApplication {
                         .flatMap(HousesApplication::extractTeasersForPage);
 
                     teasers
-                        .peek(teaser ->
-                            Try(() -> updateTeaser(teaser))
-                                .getOrElseThrow(() -> new IllegalStateException("Could not store teaser to db.")));
+                        .map(HousesApplication::updateTeaser)
+                        .forEach(Try::get);
                 }
             )
             .getOrElseThrow(() -> new IllegalStateException("Could not download main document."));
@@ -75,22 +75,21 @@ public class HousesApplication {
         return Stream.ofAll(teaserStream);
     }
 
-    private static Try<Boolean> updateTeaser(Teaser teaser) throws ClassNotFoundException {
+    private static Try<Boolean> updateTeaser(Teaser teaser) {
         logger.info("Storing teaser id={} into db", teaser.id());
 
-        String myDriver = "com.mysql.cj.jdbc.Driver";
-        String myUrl = "jdbc:mysql://localhost/houses";
-        Class.forName(myDriver);
-        return Try.withResources(() -> DriverManager.getConnection(myUrl, "root", ""))
-            .of(conn -> {
-                String query = "insert into offers (offer_id, title) values (?, ?)";
+        String myUrl = "jdbc:mysql://localhost/houses?serverTimezone=UTC";
 
-                PreparedStatement preparedStmt = conn.prepareStatement(query);
-                preparedStmt.setString(1, teaser.id());
-                preparedStmt.setString(2, teaser.title());
+        return
+            Try.withResources(() -> DriverManager.getConnection(myUrl, "houses", "eif(4es2"))
+                .of(conn -> {
+                    String query = "insert into offers (offer_id, title) values (?, ?)";
 
-                return preparedStmt.execute();
-            });
+                    PreparedStatement preparedStmt = conn.prepareStatement(query);
+                    preparedStmt.setString(1, teaser.id());
+                    preparedStmt.setString(2, teaser.title());
 
+                    return preparedStmt.execute();
+                });
     }
 }
