@@ -24,7 +24,7 @@ public class Teaser {
         return title;
     }
 
-    public String url() {
+    String url() {
         return url;
     }
 
