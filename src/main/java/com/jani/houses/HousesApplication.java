@@ -1,5 +1,7 @@
 package com.jani.houses;
 
+import io.vavr.API;
+import io.vavr.collection.List;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
@@ -13,11 +15,16 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Date;
 
 import static com.jani.houses.Teaser.teaser;
+import static io.vavr.API.List;
 import static io.vavr.API.Try;
 
 @SpringBootApplication
@@ -27,6 +34,8 @@ public class HousesApplication {
     private static final String DATABASE = "jdbc:mysql://localhost/houses?serverTimezone=CET";
 
     private static final Logger logger = LoggerFactory.getLogger(HousesApplication.class);
+
+    private static final List<String> excludes = List("Złotno", "Koziny", "Szaserów");
 
     private static final String ID = "id";
     private static final String TITLE = "title";
@@ -48,6 +57,7 @@ public class HousesApplication {
                 Stream.rangeClosed(1, maxIndex)
                     .map(page -> GRATKA + page)
                     .flatMap(HousesApplication::extractTeasersForPage)
+                    .filter(teaser -> excludes.filter(ex -> teaser.title().contains(ex)).isEmpty())
                     .map(HousesApplication::updateTeaser)
                     .forEach(Try::get)
             )
@@ -90,14 +100,23 @@ public class HousesApplication {
                         + "values (?, ?, ?, ?) "
                         + "on duplicate key update visited_time = ?";
 
-                    PreparedStatement preparedStmt = conn.prepareStatement(query);
-                    preparedStmt.setString(1, teaser.id());
-                    preparedStmt.setString(2, teaser.title());
-                    preparedStmt.setTimestamp(3, Timestamp.from(new java.util.Date().toInstant()));
-                    preparedStmt.setString(4, teaser.url());
-                    preparedStmt.setTimestamp(5, Timestamp.from(new java.util.Date().toInstant()));
+                    PreparedStatement preparedStmt = preparedStatement(teaser, conn, query);
 
                     return preparedStmt.execute();
                 });
+    }
+
+    private static PreparedStatement preparedStatement(Teaser teaser, Connection conn, String query)
+        throws SQLException {
+        Instant instant = new Date().toInstant();
+
+        PreparedStatement preparedStmt = conn.prepareStatement(query);
+        preparedStmt.setString(1, teaser.id());
+        preparedStmt.setString(2, teaser.title());
+        preparedStmt.setTimestamp(3, Timestamp.from(instant));
+        preparedStmt.setString(4, teaser.url());
+        preparedStmt.setTimestamp(5, Timestamp.from(instant));
+
+        return preparedStmt;
     }
 }
