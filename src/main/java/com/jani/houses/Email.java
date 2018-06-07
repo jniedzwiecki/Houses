@@ -3,7 +3,7 @@ package com.jani.houses;
 import io.vavr.Tuple2;
 import io.vavr.collection.List;
 import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.HtmlEmail;
+import org.apache.commons.mail.SimpleEmail;
 import org.immutables.value.Value;
 
 import javax.mail.Authenticator;
@@ -20,7 +20,7 @@ interface Email {
     Authenticator authenticator();
 
     default String send() throws EmailException {
-        HtmlEmail email = new HtmlEmail();
+        SimpleEmail email = new SimpleEmail();
         email.setHostName(hostname());
         email.addTo(to());
         email.setFrom(from());
@@ -28,18 +28,11 @@ interface Email {
         email.setAuthenticator(authenticator());
         email.setSSLOnConnect(true);
 
-        String embeddedImages = contents()
-            .map(cid -> "<embed src='" + cid._1 + "'>")
+        String message = contents()
+            .map(urlTitle -> urlTitle._2 + "\n" + urlTitle._1 + "\n\n")
             .collect(Collectors.joining());
 
-//        String embeddedImages = contents()
-//            .map(urlTitle -> Try(() -> email.embed(urlTitle._1, urlTitle._2)).getOrNull())
-//            .map(cid -> "<iframe src=\"cid:" + cid + "\">")
-//            .collect(Collectors.joining());
-
-        email.setHtmlMsg("<html><body>" + embeddedImages + "</body></html>");
-
-        email.setTextMsg("Your email client does not support HTML messages");
+        email.setMsg(message);
 
         return email.send();
     }
