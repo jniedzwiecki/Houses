@@ -2,3 +2,13 @@ logging:
   level:
     ROOT: DEBUG
     com.jani: DEBUG
+
+messaging:
+  from: domyjacek@op.pl
+  to:
+    jniedzwiecki83@gmail.com
+  subject: Domki
+  hostname: smtp.poczta.onet.pl
+
+database: jdbc:mysql://localhost/houses?serverTimezone=CET
+

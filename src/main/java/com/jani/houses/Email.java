@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @Value.Immutable
 interface Email {
-    String to();
+    List<String> to();
     String from();
     String subject();
     List<Tuple2<URL, String>> contents();
@@ -22,7 +22,7 @@ interface Email {
     default String send() throws EmailException {
         SimpleEmail email = new SimpleEmail();
         email.setHostName(hostname());
-        email.addTo(to());
+        email.addTo(to().toJavaArray(String.class));
         email.setFrom(from());
         email.setSubject(subject());
         email.setAuthenticator(authenticator());
