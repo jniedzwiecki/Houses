@@ -79,7 +79,7 @@ class OffersProcessor {
                 Option.when(tuple2s.nonEmpty(), tuple2s)
                     .map(insertedTeasers ->
                         ImmutableEmail.builder()
-                            .to(applicationProperties.messaging().to())
+                            .to(API.List(applicationProperties.messaging().to()))
                             .from(applicationProperties.messaging().from())
                             .subject(applicationProperties.messaging().subject())
                             .authenticator(
@@ -90,8 +90,7 @@ class OffersProcessor {
                             .contents(insertedTeasers)
                             .build()
                     )
-                    .forEach(e -> Try(e::send).onFailure(this
-                        ::error).toOption());
+                    .forEach(e -> Try(e::send).onFailure(this::error).toOption());
             })
             .onEmpty(() -> error(new IllegalStateException("Could not load paging document.")));
     }

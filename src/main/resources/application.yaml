@@ -5,8 +5,7 @@ logging:
 
 messaging:
   from: domyjacek@op.pl
-  to:
-    jniedzwiecki83@gmail.com
+  to: jniedzwiecki83@gmail.com,jniedzwiecki@op.pl
   subject: Domki
   hostname: smtp.poczta.onet.pl
 

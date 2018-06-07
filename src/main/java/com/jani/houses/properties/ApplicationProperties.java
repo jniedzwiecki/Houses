@@ -3,7 +3,7 @@ package com.jani.houses.properties;
 import org.immutables.value.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.List;
+import java.util.ArrayList;
 
 @ConfigurationProperties
 @Value.Modifiable
@@ -15,7 +15,7 @@ public interface ApplicationProperties {
     @Value.Modifiable
     interface MessagingProperties {
         String from();
-        List<String> to();
+        ArrayList<String> to();
         String subject();
         String hostname();
         String password();
