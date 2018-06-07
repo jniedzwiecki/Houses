@@ -10,8 +10,6 @@ import javax.mail.Authenticator;
 import java.net.URL;
 import java.util.stream.Collectors;
 
-import static io.vavr.API.Try;
-
 @Value.Immutable
 interface Email {
     String to();
@@ -31,11 +29,15 @@ interface Email {
         email.setSSLOnConnect(true);
 
         String embeddedImages = contents()
-            .map(urlTitle -> Try(() -> email.embed(urlTitle._1, urlTitle._2)).getOrNull())
-            .map(cid -> "<img src=\"cid:" + cid + "\">")
+            .map(cid -> "<embed src='" + cid._1 + "'>")
             .collect(Collectors.joining());
 
-        email.setHtmlMsg("<html>" + embeddedImages + "</html>");
+//        String embeddedImages = contents()
+//            .map(urlTitle -> Try(() -> email.embed(urlTitle._1, urlTitle._2)).getOrNull())
+//            .map(cid -> "<iframe src=\"cid:" + cid + "\">")
+//            .collect(Collectors.joining());
+
+        email.setHtmlMsg("<html><body>" + embeddedImages + "</body></html>");
 
         email.setTextMsg("Your email client does not support HTML messages");
 

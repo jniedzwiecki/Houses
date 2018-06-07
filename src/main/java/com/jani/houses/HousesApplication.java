@@ -30,6 +30,7 @@ import static io.vavr.API.List;
 import static io.vavr.API.Try;
 import static io.vavr.API.Tuple;
 import static io.vavr.collection.Stream.rangeClosed;
+import static java.util.function.Function.identity;
 
 @SpringBootApplication
 @EnableScheduling
@@ -70,44 +71,23 @@ public class HousesApplication {
                         .filter(TEASER_FILTER)
                     );
 
-                List<Tuple2<URL, String>> emailContentList =
-                    updateTeasers(teasers)
-                        .zip(teasers)
-                        .filter(resultSetWithTeaser -> isInsertResultSet(resultSetWithTeaser._1))
-                        .map(HousesApplication::teaser)
-                        .map(HousesApplication::teaserToEmailContentItem)
-                        .filter(Option::isDefined)
-                        .map(Option::get);
+                insertOrUpdateTeasers(teasers);
 
-                Email email = ImmutableEmail.builder()
-                    .to("jniedzwiecki83@gmail.com")
-                    .from("domyjacek@op.pl")
-                    .subject("Domki")
-                    .authenticator(new DefaultAuthenticator("domyjacek@op.pl", "jacekNNN666"))
-                    .hostname("smtp.poczta.onet.pl")
-                    .contents(emailContentList)
-                    .build();
-
-//                Try.of(email::send)
-//                    .orElseRun(HousesApplication::error);
+                List<Tuple2<URL, String>> tuple2s = queryInsertedTeasers();
+                Option.when(tuple2s.nonEmpty(), tuple2s)
+                    .map(insertedTeasers ->
+                        ImmutableEmail.builder()
+                            .to("jniedzwiecki83@gmail.com")
+                            .from("domyjacek@op.pl")
+                            .subject("Domki")
+                            .authenticator(new DefaultAuthenticator("domyjacek@op.pl", "jacekNNN666"))
+                            .hostname("smtp.poczta.onet.pl")
+                            .contents(insertedTeasers)
+                            .build()
+                    )
+                    .forEach(e -> Try(e::send).onFailure(HousesApplication::error).toOption());
             })
             .onEmpty(() -> error(new IllegalStateException("Could not load paging document.")));
-    }
-
-    private static Option<Tuple2<URL, String>> teaserToEmailContentItem(Teaser teaser) {
-        return Try(() -> new URL(teaser.url()))
-            .onFailure(HousesApplication::error)
-            .toOption()
-            .map(u -> Tuple(u, teaser.title()));
-    }
-
-    private static Teaser teaser(Tuple2<Option<ResultSet>, Teaser> resultSetWithTeaser) {
-        return resultSetWithTeaser._2();
-    }
-
-    private static boolean isInsertResultSet(Option<ResultSet> resultSet) {
-        return resultSet.isDefined()
-            && Try(() -> resultSet.get().rowInserted()).getOrElse(Boolean.FALSE);
     }
 
     private static String pageNumberToUrl(Integer page) {
@@ -148,23 +128,50 @@ public class HousesApplication {
                 .build());
     }
 
-    private static List<Option<ResultSet>> updateTeasers(List<Teaser> teasers) {
-        String query = "insert into offers (offer_id, title, added_time, visited_time, url) "
+    private static void insertOrUpdateTeasers(List<Teaser> teasers) {
+        String insertQuery = "insert into offers (offer_id, title, added_time, visited_time, url) "
             + "values (?, ?, ?, ?, ?) "
-            + "on duplicate key update visited_time = ?";
+            + "on duplicate key update visited_time = ?, updates = updates + 1";
+
+        Try.withResources(() -> DriverManager.getConnection(DATABASE, "houses", "eif(4es2"))
+            .of(connection -> {
+                    teasers
+                        .forEach(teaser -> {
+                                logger.info("Storing teaser id={} into db", teaser.id());
+                                Try.of(() -> preparedStatement(teaser, connection, insertQuery).executeUpdate())
+                                    .onFailure(HousesApplication::error)
+                                    .toOption();
+                            }
+                        );
+                    return null;
+                }
+            )
+            .onFailure(HousesApplication::error);
+    }
+
+    private static List<Tuple2<URL, String>> queryInsertedTeasers() {
+        String offerQuery = "select * from offers where updates = 0";
 
         return Try.withResources(() -> DriverManager.getConnection(DATABASE, "houses", "eif(4es2"))
             .of(connection ->
-                teasers
-                    .peek(teaser -> logger.info("Storing teaser id={} into db", teaser.id()))
-                    .map(
-                        teaser ->
-                            Try.of(() -> preparedStatement(teaser, connection, query).executeQuery())
-                                .onFailure(HousesApplication::error)
-                                .toOption()
-                    )
+                Try.of(() -> {
+                    ResultSet resultSet = insertedTeasersStatement(offerQuery, connection).executeQuery();
+                    List<Tuple2<URL, String>> offers = List();
+
+                    while (resultSet.next()) {
+                        String title = resultSet.getString(2);
+                        String url = resultSet.getString(5);
+                        offers = offers.append(Tuple(new URL(url), title));
+                    }
+
+                    return offers;
+                })
+                    .onFailure(HousesApplication::error)
+                    .toOption()
             )
             .onFailure(HousesApplication::error)
+            .toOption()
+            .flatMap(identity())
             .getOrElse(List.empty());
     }
 
@@ -181,5 +188,10 @@ public class HousesApplication {
         preparedStmt.setTimestamp(6, currentTime);
 
         return preparedStmt;
+    }
+
+    private static PreparedStatement insertedTeasersStatement(String offerQuery, Connection connection)
+        throws SQLException {
+        return connection.prepareStatement(offerQuery);
     }
 }
