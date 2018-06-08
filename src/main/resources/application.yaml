@@ -9,8 +9,12 @@ messaging:
   subject: Domki
   hostname: smtp.poczta.onet.pl
 
-database:
-  url: jdbc:mysql://localhost/houses?serverTimezone=CET
-  name: houses
-
 excludes: Złotno,Koziny,Szaserów
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: jdbc:mysql://localhost:3306/houses?serverTimezone=CET
+    username: houses
