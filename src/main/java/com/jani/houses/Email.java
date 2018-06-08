@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 
 @Value.Immutable
 interface Email {
-    List<String> to();
-    String from();
+    List<String> toAddresses();
+    String fromAddress();
     String subject();
     List<Tuple2<URL, String>> contents();
     String hostname();
@@ -22,8 +22,8 @@ interface Email {
     default String send() throws EmailException {
         SimpleEmail email = new SimpleEmail();
         email.setHostName(hostname());
-        email.addTo(to().toJavaArray(String.class));
-        email.setFrom(from());
+        email.addTo(toAddresses().toJavaArray(String.class));
+        email.setFrom(fromAddress());
         email.setSubject(subject());
         email.setAuthenticator(authenticator());
         email.setSSLOnConnect(true);

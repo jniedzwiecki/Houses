@@ -10,7 +10,8 @@ import java.util.ArrayList;
 @Value.Style(create = "new", passAnnotations = ConfigurationProperties.class)
 public interface ApplicationProperties {
     ModifiableMessagingProperties messaging();
-    String database();
+    ModifiableDatabaseProperties database();
+    ArrayList<String> excludes();
 
     @Value.Modifiable
     interface MessagingProperties {
@@ -18,6 +19,13 @@ public interface ApplicationProperties {
         ArrayList<String> to();
         String subject();
         String hostname();
+        String password();
+    }
+
+    @Value.Modifiable
+    interface DatabaseProperties {
+        String url();
+        String name();
         String password();
     }
 }
