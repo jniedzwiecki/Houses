@@ -1,6 +1,6 @@
 package com.jani.houses;
 
-enum Provider {
+enum OffersProvider {
 
     GRATKA("https://gratka.pl/nieruchomosci/domy?rodzaj-ogloszenia=sprzedaz&lokalizacja_region=%C5%82%C3%B3dzkie" +
         "&lokalizacja_miejscowosc=lodz&lokalizacja_dzielnica=polesie&page=") {
@@ -13,7 +13,7 @@ enum Provider {
 
     final String baseUrl;
 
-    Provider(String baseUrl) {
+    OffersProvider(String baseUrl) {
         this.baseUrl = baseUrl;
     }
 

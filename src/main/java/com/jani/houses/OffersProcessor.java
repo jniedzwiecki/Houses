@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 import java.net.URL;
 import java.util.function.Predicate;
 
-import static com.jani.houses.Provider.GRATKA;
+import static com.jani.houses.OffersProvider.GRATKA;
 import static io.vavr.API.Option;
 import static io.vavr.API.Try;
 import static io.vavr.collection.Stream.rangeClosed;
@@ -77,8 +77,8 @@ class OffersProcessor {
             .toOption();
     }
 
-    private void insertOrUpdateTeasersOnPage(Integer integer, Provider provider) {
-        getPage(provider.pageNumberToUrl(integer))
+    private void insertOrUpdateTeasersOnPage(Integer integer, OffersProvider offersProvider) {
+        getPage(offersProvider.pageNumberToUrl(integer))
             .map(p -> p.teasers(TEASER_FILTER.apply(applicationProperties)))
             .forEach(offerRepository::insertOrUpdateTeasers);
     }

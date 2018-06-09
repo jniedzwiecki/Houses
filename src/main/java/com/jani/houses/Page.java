@@ -13,7 +13,6 @@ import java.util.function.Predicate;
 import static io.vavr.API.Try;
 
 class Page {
-
     private static final Logger logger = LoggerFactory.getLogger(OffersProcessor.class);
 
     private static final String DIV_PAGINATION_CLASS = "div[class=pagination]";
