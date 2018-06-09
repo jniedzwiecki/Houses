@@ -55,7 +55,7 @@ class OffersProcessor {
                 page.maxPageIndex()
                     .map(maxIndex -> {
                         rangeClosed(1, maxIndex)
-                            .forEach(index -> insertOrUpdateTeasersOnPage(index, GRATKA));
+                            .forEach(index -> insertOrUpdateTeasersFromPage(index, GRATKA));
 
                         return newOffers()
                             .onEmpty(() -> logger.info(NO_NEW_CONTENT))
@@ -77,7 +77,7 @@ class OffersProcessor {
             .toOption();
     }
 
-    private void insertOrUpdateTeasersOnPage(Integer integer, OffersProvider offersProvider) {
+    private void insertOrUpdateTeasersFromPage(Integer integer, OffersProvider offersProvider) {
         getPage(offersProvider.pageNumberToUrl(integer))
             .map(p -> p.teasers(TEASER_FILTER.apply(applicationProperties)))
             .forEach(offerRepository::insertOrUpdateTeasers);
