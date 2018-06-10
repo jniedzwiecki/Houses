@@ -41,7 +41,7 @@ class Page {
             .toOption();
     }
 
-    List<Teaser> teasers(Predicate<Teaser> teaserPredicate) {
+    List<Teaser> filteredTeasers(Predicate<Teaser> teaserPredicate) {
         return extractTeasersFromPage()
             .filter(teaserPredicate)
             .toList();

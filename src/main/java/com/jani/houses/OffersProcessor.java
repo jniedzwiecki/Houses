@@ -23,7 +23,7 @@ import java.util.function.Predicate;
 import static com.jani.houses.OffersProvider.GRATKA;
 import static io.vavr.API.Option;
 import static io.vavr.API.Try;
-import static io.vavr.collection.Stream.rangeClosed;
+import static io.vavr.collection.List.rangeClosed;
 
 @Component
 @EnableConfigurationProperties(ModifiableApplicationProperties.class)
@@ -50,37 +50,42 @@ class OffersProcessor {
 
     @Scheduled(fixedRate = 600000)
     void browse() {
-        getPage(GRATKA.welcomePageUrl())
-            .peek(page ->
-                page.maxPageIndex()
-                    .map(maxIndex -> {
-                        rangeClosed(1, maxIndex)
-                            .forEach(index -> insertOrUpdateTeasersFromPage(index, GRATKA));
-
-                        return newOffers()
-                            .onEmpty(() -> logger.info(NO_NEW_CONTENT))
-                            .map(this::createEmailWithTeasers)
-                            .map(email ->
-                                Try(email::send)
-                                    .onFailure(this::error));
-                    })
+        downloadPage(GRATKA.welcomePageUrl())
+            .onEmpty(() -> error(new IllegalStateException("Could not load document.")))
+            .forEach(mainPage ->
+                mainPage.maxPageIndex()
                     .onEmpty(() -> error(new IllegalStateException("Could not load number of pages.")))
-            )
-            .onEmpty(() -> error(new IllegalStateException("Could not load document.")));
+                    .map(maxIndex -> filteredTeasersFromAllSubpages(maxIndex, GRATKA))
+                    .forEach(offerRepository::insertOrUpdateTeasers)
+            );
+
+        newOffers()
+            .onEmpty(() -> logger.info(NO_NEW_CONTENT))
+            .map(this::createEmailWithTeasers)
+            .map(email ->
+                Try(email::send)
+                    .onFailure(this::error));
     }
 
-    private Option<Page> getPage(String url) {
+    private List<Teaser> filteredTeasersFromAllSubpages(Integer maxIndex, OffersProvider offersProvider) {
+        return rangeClosed(1, maxIndex)
+            .flatMap(index ->
+                filteredTeasersFromPage(index, offersProvider)
+                    .getOrElse(List.empty())
+            );
+    }
+
+    private Option<List<Teaser>> filteredTeasersFromPage(Integer pageNumber, OffersProvider offersProvider) {
+        return downloadPage(offersProvider.pageNumberToUrl(pageNumber))
+            .map(p -> p.filteredTeasers(TEASER_FILTER.apply(applicationProperties)));
+    }
+
+    private Option<Page> downloadPage(String url) {
         logger.info("Connecting: {}", url);
         return Try(() -> Jsoup.connect(url).get())
             .onFailure(this::error)
             .map(Page::new)
             .toOption();
-    }
-
-    private void insertOrUpdateTeasersFromPage(Integer integer, OffersProvider offersProvider) {
-        getPage(offersProvider.pageNumberToUrl(integer))
-            .map(p -> p.teasers(TEASER_FILTER.apply(applicationProperties)))
-            .forEach(offerRepository::insertOrUpdateTeasers);
     }
 
     private Option<List<Offer>> newOffers() {
