@@ -16,5 +16,5 @@ spring:
     hibernate:
       ddl-auto: update
   datasource:
-    url: jdbc:mysql://localhost:3306/houses?serverTimezone=CET
+    url: jdbc:mysql://localhost:3306/houses?serverTimezone=CET&useUnicode=yes&characterEncoding=UTF-8
     username: houses
