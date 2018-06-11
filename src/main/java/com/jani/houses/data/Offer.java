@@ -1,7 +1,6 @@
 package com.jani.houses.data;
 
 import io.vavr.Tuple2;
-import io.vavr.collection.List;
 import io.vavr.control.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

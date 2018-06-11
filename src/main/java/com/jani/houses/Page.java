@@ -1,14 +1,11 @@
 package com.jani.houses;
 
-import io.vavr.collection.List;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.function.Predicate;
 
 import static io.vavr.API.Try;
 
@@ -41,12 +38,7 @@ class Page {
             .toOption();
     }
 
-    List<Teaser> teasers() {
-        return extractTeasersFromPage()
-            .toList();
-    }
-
-    private Stream<Teaser> extractTeasersFromPage() {
+    Stream<Teaser> extractTeasersFromPage() {
         return Stream.ofAll(document.select(A_TEASER_CLASS).stream())
             .map(this::createTeaser);
     }

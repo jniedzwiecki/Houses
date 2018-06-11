@@ -56,8 +56,8 @@ class OffersProcessor {
                 mainPage.maxPageIndex()
                     .onEmpty(() -> error(new IllegalStateException("Could not load number of pages.")))
                     .map(maxIndex ->
-                        allSubpages(maxIndex, GRATKA)
-                            .flatMap(Page::teasers)
+                        downloadSubpages(maxIndex, GRATKA)
+                            .flatMap(Page::extractTeasersFromPage)
                             .filter(TEASER_FILTER.apply(applicationProperties)))
                     .forEach(offerRepository::insertOrUpdateTeasers)
             );
@@ -70,7 +70,7 @@ class OffersProcessor {
                     .onFailure(this::error));
     }
 
-    private List<Page> allSubpages(Integer maxIndex, OffersProvider offersProvider) {
+    private List<Page> downloadSubpages(Integer maxIndex, OffersProvider offersProvider) {
         return rangeClosed(1, maxIndex)
             .flatMap(pageNumber -> downloadPage(offersProvider.pageNumberToUrl(pageNumber)));
     }
