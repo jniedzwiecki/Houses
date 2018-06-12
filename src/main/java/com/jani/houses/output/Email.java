@@ -1,4 +1,4 @@
-package com.jani.houses;
+package com.jani.houses.output;
 
 import io.vavr.Tuple2;
 import io.vavr.collection.List;
@@ -11,7 +11,7 @@ import java.net.URL;
 import java.util.stream.Collectors;
 
 @Value.Immutable
-interface Email {
+public interface Email {
     List<String> toAddresses();
     String fromAddress();
     String subject();

@@ -2,6 +2,7 @@ package com.jani.houses;
 
 import com.jani.houses.data.Offer;
 import com.jani.houses.data.OfferRepository;
+import com.jani.houses.output.Teaser;
 import com.jani.houses.properties.ApplicationProperties;
 import com.jani.houses.properties.ModifiableApplicationProperties;
 import io.vavr.Function1;
@@ -10,12 +11,14 @@ import io.vavr.collection.List;
 import io.vavr.control.Option;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import com.jani.houses.output.ImmutableEmail;
 
 import java.net.URL;
 import java.util.function.Predicate;
@@ -81,16 +84,15 @@ class OffersProcessor {
             );
     }
 
-    private List<Page> downloadSubpages(Integer maxIndex, OffersProvider offersProvider) {
+    private List<Document> downloadSubpages(Integer maxIndex, OffersProvider offersProvider) {
         return rangeClosed(1, maxIndex)
             .flatMap(pageNumber -> downloadPage(offersProvider.pageNumberToUrl(pageNumber)));
     }
 
-    private Option<Page> downloadPage(String url) {
+    private Option<Document> downloadPage(String url) {
         logger.info("Connecting: {}", url);
         return Try(() -> Jsoup.connect(url).get())
             .onFailure(this::error)
-            .map(Page::new)
             .toOption();
     }
 

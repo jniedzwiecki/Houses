@@ -1,4 +1,4 @@
-package com.jani.houses;
+package com.jani.houses.output;
 
 import org.immutables.value.Value;
 

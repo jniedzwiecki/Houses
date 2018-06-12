@@ -1,6 +1,6 @@
 package com.jani.houses.data;
 
-import com.jani.houses.Teaser;
+import com.jani.houses.output.Teaser;
 import io.vavr.collection.List;
 
 public interface OfferRepositoryCustom {

@@ -1,6 +1,6 @@
 package com.jani.houses.data;
 
-import com.jani.houses.Teaser;
+import com.jani.houses.output.Teaser;
 import io.vavr.API;
 import io.vavr.collection.List;
 import io.vavr.collection.Stream;

@@ -1,7 +1,10 @@
 package com.jani.houses;
 
+import com.jani.houses.output.ImmutableTeaser;
+import com.jani.houses.output.Teaser;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +24,9 @@ enum OffersProvider {
         private static final String TITLE = "title";
 
         @Override
-        Option<Integer> maxPageIndex(Page mainPage) {
+        Option<Integer> maxPageIndex(Document mainPage) {
             return Try(() ->
-                mainPage.document()
+                mainPage
                     .select(DIV_PAGINATION_CLASS)
                     .last()
                     .select(INPUT_PAGINATION)
@@ -34,8 +37,8 @@ enum OffersProvider {
         }
 
         @Override
-        Stream<Teaser> extractTeasersFromPage(Page page) {
-            return Stream.ofAll(page.document().select(A_TEASER_CLASS).stream())
+        Stream<Teaser> extractTeasersFromPage(Document page) {
+            return Stream.ofAll(page.select(A_TEASER_CLASS).stream())
                 .map(this::createTeaser);
         }
 
@@ -58,8 +61,8 @@ enum OffersProvider {
         private static final String SPAN_OFFER_ITEM_TITLE_CLASS = "span[class=offer-item-title]";
 
         @Override
-        Option<Integer> maxPageIndex(Page mainPage) {
-            return Try(() -> mainPage.document()
+        Option<Integer> maxPageIndex(Document mainPage) {
+            return Try(() -> mainPage
                 .select(LI_PAGER_COUNTER_CLASS)
                 .select(STRONG_CURRENT_CLASS)
                 .text())
@@ -69,8 +72,8 @@ enum OffersProvider {
         }
 
         @Override
-        Stream<Teaser> extractTeasersFromPage(Page page) {
-            return Stream.ofAll(page.document().select(ARTICLE_OFFER_ITEM_CLASS).stream())
+        Stream<Teaser> extractTeasersFromPage(Document page) {
+            return Stream.ofAll(page.select(ARTICLE_OFFER_ITEM_CLASS).stream())
                 .map(this::createTeaser);
         }
 
@@ -93,8 +96,8 @@ enum OffersProvider {
         private static final String DIV_SPACE_REL_CLASS = "div[class=space rel]";
 
         @Override
-        Option<Integer> maxPageIndex(Page mainPage) {
-            return Try(() -> mainPage.document()
+        Option<Integer> maxPageIndex(Document mainPage) {
+            return Try(() -> mainPage
                 .select(DIV_PAGER_REL_CRL_CLASS)
                 .select(ANCHOR_BLOCK_CLASS)
                 .last()
@@ -105,9 +108,9 @@ enum OffersProvider {
         }
 
         @Override
-        Stream<Teaser> extractTeasersFromPage(Page page) {
+        Stream<Teaser> extractTeasersFromPage(Document page) {
             return Stream.ofAll(
-                page.document()
+                page
                     .select(TABLE_OFFERS)
                     .select(TABLE_DATA_ID_INSIDE_TD_CLASS_OFFER)
                     .stream()
@@ -150,9 +153,9 @@ enum OffersProvider {
         logger.error(throwable.getMessage(), throwable);
     }
 
-    abstract Option<Integer> maxPageIndex(Page mainPage);
+    abstract Option<Integer> maxPageIndex(Document mainPage);
 
-    abstract Stream<Teaser> extractTeasersFromPage(Page page);
+    abstract Stream<Teaser> extractTeasersFromPage(Document page);
 }
 
 
