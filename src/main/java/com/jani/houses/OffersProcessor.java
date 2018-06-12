@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.function.Predicate;
 
 import static com.jani.houses.OffersProvider.GRATKA;
+import static com.jani.houses.OffersProvider.OTODOM;
 import static io.vavr.API.Option;
 import static io.vavr.API.Try;
 import static io.vavr.collection.List.rangeClosed;
@@ -50,17 +51,12 @@ class OffersProcessor {
 
     @Scheduled(fixedRate = 600000)
     void browse() {
-        downloadPage(GRATKA.welcomePageUrl())
-            .onEmpty(() -> error(new IllegalStateException("Could not load document.")))
-            .forEach(mainPage ->
-                mainPage.maxPageIndex()
-                    .onEmpty(() -> error(new IllegalStateException("Could not load number of pages.")))
-                    .map(maxIndex ->
-                        downloadSubpages(maxIndex, GRATKA)
-                            .flatMap(Page::extractTeasersFromPage)
-                            .filter(TEASER_FILTER.apply(applicationProperties)))
-                    .forEach(offerRepository::insertOrUpdateTeasers)
-            );
+//        teaserListFromProvider(GRATKA)
+//            .forEach(offerRepository::insertOrUpdateTeasers);
+        teaserListFromProvider(OTODOM)
+            .forEach(offerRepository::insertOrUpdateTeasers);
+//        teaserListFromProvider(OLX)
+//            .forEach(offerRepository::insertOrUpdateTeasers);
 
         newOffers()
             .onEmpty(() -> logger.info(NO_NEW_CONTENT))
@@ -68,6 +64,19 @@ class OffersProcessor {
             .map(email ->
                 Try(email::send)
                     .onFailure(this::error));
+    }
+
+    private Option<List<Teaser>> teaserListFromProvider(OffersProvider offerProvider) {
+        return downloadPage(offerProvider.welcomePageUrl())
+            .onEmpty(() -> error(new IllegalStateException("Could not load document.")))
+            .flatMap(mainPage ->
+                offerProvider.maxPageIndex(mainPage)
+                    .onEmpty(() -> error(new IllegalStateException("Could not load number of pages.")))
+                    .map(maxIndex ->
+                        downloadSubpages(maxIndex, offerProvider)
+                            .flatMap(offerProvider::extractTeasersFromPage)
+                            .filter(TEASER_FILTER.apply(applicationProperties)))
+            );
     }
 
     private List<Page> downloadSubpages(Integer maxIndex, OffersProvider offersProvider) {
