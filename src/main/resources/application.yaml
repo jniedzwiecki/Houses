@@ -9,7 +9,7 @@ messaging:
   subject: Domki
   hostname: smtp.poczta.onet.pl
 
-excludes: Złotno,Koziny,Szaserów
+excludes: Złotno,Złotnie,Koziny,Szaserów
 
 spring:
   jpa:

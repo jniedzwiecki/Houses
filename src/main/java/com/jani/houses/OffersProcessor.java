@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.function.Predicate;
 
 import static com.jani.houses.OffersProvider.GRATKA;
+import static com.jani.houses.OffersProvider.OLX;
 import static com.jani.houses.OffersProvider.OTODOM;
 import static io.vavr.API.Option;
 import static io.vavr.API.Try;
@@ -38,7 +39,7 @@ class OffersProcessor {
         properties ->
             teaser ->
                 List.ofAll(properties.excludes())
-                    .filter(excl -> teaser.title().contains(excl))
+                    .filter(excl -> teaser.title().toLowerCase().contains(excl.toLowerCase()))
                     .isEmpty();
 
     private final ApplicationProperties applicationProperties;
@@ -51,12 +52,12 @@ class OffersProcessor {
 
     @Scheduled(fixedRate = 600000)
     void browse() {
-//        teaserListFromProvider(GRATKA)
-//            .forEach(offerRepository::insertOrUpdateTeasers);
+        teaserListFromProvider(GRATKA)
+            .forEach(offerRepository::insertOrUpdateTeasers);
         teaserListFromProvider(OTODOM)
             .forEach(offerRepository::insertOrUpdateTeasers);
-//        teaserListFromProvider(OLX)
-//            .forEach(offerRepository::insertOrUpdateTeasers);
+        teaserListFromProvider(OLX)
+            .forEach(offerRepository::insertOrUpdateTeasers);
 
         newOffers()
             .onEmpty(() -> logger.info(NO_NEW_CONTENT))
@@ -75,6 +76,7 @@ class OffersProcessor {
                     .map(maxIndex ->
                         downloadSubpages(maxIndex, offerProvider)
                             .flatMap(offerProvider::extractTeasersFromPage)
+                            .distinctBy(Teaser::id)
                             .filter(TEASER_FILTER.apply(applicationProperties)))
             );
     }

@@ -39,8 +39,7 @@ public class Offer {
         this.updates = updates;
     }
 
-    public Offer() {
-    }
+    public Offer() { }
 
     @Id
     private String id;
@@ -64,11 +63,11 @@ public class Offer {
         return id;
     }
 
-    String title() {
+    private String title() {
         return title;
     }
 
-    String url() {
+    private String url() {
         return url;
     }
 
