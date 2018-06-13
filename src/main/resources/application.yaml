@@ -5,8 +5,8 @@ logging:
 
 messaging:
   from: domyjacek@op.pl
-  to: jniedzwiecki83@gmail.com,jniedzwiecki@op.pl
-  subject: Domki
+  to: jniedzwiecki83@gmail.com
+  subject: Ogłoszenia domy
   hostname: smtp.poczta.onet.pl
 
 excludes: Złotno,Złotnie,Koziny,Szaserów
