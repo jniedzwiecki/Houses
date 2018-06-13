@@ -12,9 +12,6 @@ messaging:
 excludes: Złotno,Złotnie,Koziny,Szaserów
 
 spring:
-  jpa:
-    hibernate:
-      ddl-auto: create
   datasource:
-    url: jdbc:mysql://localhost:3306/houses?serverTimezone=CET&useUnicode=yes&characterEncoding=UTF-8
-    username: houses
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1

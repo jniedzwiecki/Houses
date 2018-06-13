@@ -27,6 +27,7 @@ import static com.jani.houses.OffersProvider.GRATKA;
 import static com.jani.houses.OffersProvider.OLX;
 import static com.jani.houses.OffersProvider.OTODOM;
 import static io.vavr.API.Option;
+import static io.vavr.API.Some;
 import static io.vavr.API.Try;
 import static io.vavr.collection.List.rangeClosed;
 
@@ -35,6 +36,7 @@ import static io.vavr.collection.List.rangeClosed;
 @EnableScheduling
 class OffersProcessor {
     private static final String NO_NEW_CONTENT = "No new offers to send an email";
+    private static final int DEFAULT_NUMBER_OF_PAGES = 1;
 
     private static final Logger logger = LoggerFactory.getLogger(OffersProcessor.class);
 
@@ -76,6 +78,7 @@ class OffersProcessor {
             .flatMap(mainPage ->
                 offerProvider.maxPageIndex(mainPage)
                     .onEmpty(() -> error(new IllegalStateException("Could not load number of pages.")))
+                    .orElse(() -> Some(DEFAULT_NUMBER_OF_PAGES))
                     .map(maxIndex ->
                         downloadSubpages(maxIndex, offerProvider)
                             .flatMap(offerProvider::extractTeasersFromPage)

@@ -21,6 +21,7 @@ public interface Email {
 
     default String send() throws EmailException {
         SimpleEmail email = new SimpleEmail();
+        email.setCharset("UTF-8");
         email.setHostName(hostname());
         email.addTo(toAddresses().toJavaArray(String.class));
         email.setFrom(fromAddress());
