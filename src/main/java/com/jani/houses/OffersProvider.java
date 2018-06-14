@@ -9,6 +9,8 @@ import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.function.Predicate;
+
 import static io.vavr.API.Try;
 
 enum OffersProvider {
@@ -114,6 +116,7 @@ enum OffersProvider {
                     .select(TABLE_OFFERS)
                     .select(TABLE_DATA_ID_INSIDE_TD_CLASS_OFFER)
                     .stream()
+                    .filter(OFFER_TABLE_SELECTOR)
             ).map(this::createTeaser);
 
         }
@@ -132,6 +135,12 @@ enum OffersProvider {
     static final String DATA_ID = "data-id";
     static final String ANCHOR = "a";
     static final String STRONG = "strong";
+
+    public static final Predicate<Element> OFFER_TABLE_SELECTOR =
+        table ->
+            table.getElementsByTag("span")
+                .stream()
+                .anyMatch(e -> e.text().contains("Łódź, Polesie"));
 
     private final Logger logger = LoggerFactory.getLogger(OffersProvider.class);
 

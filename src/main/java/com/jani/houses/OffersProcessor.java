@@ -57,10 +57,10 @@ class OffersProcessor {
 
     @Scheduled(fixedRate = 600000)
     void browse() {
-        teaserListFromProvider(GRATKA)
-            .forEach(offerRepository::insertOrUpdateTeasers);
-        teaserListFromProvider(OTODOM)
-            .forEach(offerRepository::insertOrUpdateTeasers);
+//        teaserListFromProvider(GRATKA)
+//            .forEach(offerRepository::insertOrUpdateTeasers);
+//        teaserListFromProvider(OTODOM)
+//            .forEach(offerRepository::insertOrUpdateTeasers);
         teaserListFromProvider(OLX)
             .forEach(offerRepository::insertOrUpdateTeasers);
 
@@ -77,7 +77,7 @@ class OffersProcessor {
             .onEmpty(() -> error(new IllegalStateException("Could not load document.")))
             .flatMap(mainPage ->
                 offerProvider.maxPageIndex(mainPage)
-                    .onEmpty(() -> error(new IllegalStateException("Could not load number of pages.")))
+                    .onEmpty(() -> info("Could not load number of pages."))
                     .orElse(() -> Some(DEFAULT_NUMBER_OF_PAGES))
                     .map(maxIndex ->
                         downloadSubpages(maxIndex, offerProvider)
@@ -129,5 +129,9 @@ class OffersProcessor {
 
     private void error(Throwable throwable) {
         logger.error(throwable.getMessage(), throwable);
+    }
+
+    private void info(String info) {
+        logger.info(info);
     }
 }

@@ -16,5 +16,6 @@ spring:
     hibernate:
       ddl-auto: create
   datasource:
+    driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://localhost:3306/houses?serverTimezone=CET&useUnicode=yes&characterEncoding=UTF-8
     username: houses
