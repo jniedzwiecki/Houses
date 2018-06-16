@@ -5,6 +5,7 @@ import com.jani.houses.data.OfferRepository;
 import com.jani.houses.output.Teaser;
 import com.jani.houses.properties.ApplicationProperties;
 import com.jani.houses.properties.ModifiableApplicationProperties;
+import io.vavr.API;
 import io.vavr.Function1;
 import io.vavr.Tuple2;
 import io.vavr.collection.List;
@@ -21,11 +22,14 @@ import org.springframework.stereotype.Component;
 import com.jani.houses.output.ImmutableEmail;
 
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.function.Predicate;
 
 import static com.jani.houses.OffersProvider.GRATKA;
 import static com.jani.houses.OffersProvider.OLX;
 import static com.jani.houses.OffersProvider.OTODOM;
+import static com.jani.houses.data.Offer.offer;
+import static io.vavr.API.List;
 import static io.vavr.API.Option;
 import static io.vavr.API.Some;
 import static io.vavr.API.Try;
@@ -57,19 +61,19 @@ class OffersProcessor {
 
     @Scheduled(fixedRate = 600000)
     void browse() {
-//        teaserListFromProvider(GRATKA)
-//            .forEach(offerRepository::insertOrUpdateTeasers);
-//        teaserListFromProvider(OTODOM)
-//            .forEach(offerRepository::insertOrUpdateTeasers);
-        teaserListFromProvider(OLX)
-            .forEach(offerRepository::insertOrUpdateTeasers);
+        LocalDateTime now = LocalDateTime.now();
+
+        List(OffersProvider.values())
+            .flatMap(this::teaserListFromProvider)
+            .map(teasers -> teasers.map(teaser ->  offer(teaser.id(), teaser.title(), teaser.url(), now, now)))
+            .forEach(offerRepository::insertOrUpdateOffers);
 
         newOffers()
             .onEmpty(() -> logger.info(NO_NEW_CONTENT))
-            .map(this::createEmailWithTeasers)
-            .map(email ->
-                Try(email::send)
-                    .onFailure(this::error));
+            .map(this::createEmailWithTeasers);
+//            .map(email ->
+//                Try(email::send)
+//                    .onFailure(this::error));
     }
 
     private Option<List<Teaser>> teaserListFromProvider(OffersProvider offerProvider) {

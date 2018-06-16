@@ -1,6 +1,5 @@
 package com.jani.houses.data;
 
-import com.jani.houses.output.Teaser;
 import io.vavr.API;
 import io.vavr.collection.List;
 import io.vavr.collection.Stream;
@@ -15,8 +14,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.time.LocalDateTime;
 
-import static com.jani.houses.data.Offer.offer;
-
 @Transactional
 public class OfferRepositoryImpl implements OfferRepositoryCustom {
 
@@ -29,20 +26,13 @@ public class OfferRepositoryImpl implements OfferRepositoryCustom {
     }
 
     @Override
-    public void insertOrUpdateTeasers(List<Teaser> teasers) {
-        logger.info("Storing/updating {} teasers", teasers.size());
-
-        LocalDateTime now = LocalDateTime.now();
-
-        List<Offer> offers = teasers.map(teaser ->
-            offer(teaser.id(), teaser.title(), teaser.url(), now, now)
-        );
+    public void insertOrUpdateOffers(List<Offer> offers) {
+        logger.info("Storing/updating {} offers", offers.size());
 
         offers.forEach(this::persistOrUpdate);
 
         entityManager.flush();
     }
-
 
     @Override
     public List<Offer> queryInsertedOffers() {

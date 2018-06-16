@@ -22,7 +22,7 @@ public class Offer {
     @Transient
     private Logger logger = LoggerFactory.getLogger(Offer.class);
 
-    static Offer offer(
+    public static Offer offer(
         String id,
         String title,
         String url,

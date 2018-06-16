@@ -9,6 +9,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
@@ -22,7 +23,7 @@ import static com.jani.houses.OffersProvider.GRATKA;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = { HousesApplication.class, H2JpaConfig.class })
+@SpringBootTest
 class GratkaProvidersTest {
 
     @Value("classpath:basicExtractTeasersTest.html")
@@ -31,7 +32,7 @@ class GratkaProvidersTest {
     @Value("classpath:gratkaProviderTest.html")
     private Resource gratkaProviderTestResource;
 
-    @javax.annotation.Resource
+    @Autowired
     private OfferRepository offerRepository;
 
     private static final int BASIC_TEASER_NUMBER = 3;
