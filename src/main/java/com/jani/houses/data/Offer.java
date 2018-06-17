@@ -65,11 +65,11 @@ public class Offer {
         return id;
     }
 
-    private String title() {
+    String title() {
         return title;
     }
 
-    private String url() {
+    String url() {
         return url;
     }
 

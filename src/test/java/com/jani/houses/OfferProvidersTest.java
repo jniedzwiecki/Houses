@@ -1,6 +1,5 @@
 package com.jani.houses;
 
-import com.jani.houses.data.OfferRepository;
 import com.jani.houses.output.Teaser;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
@@ -9,9 +8,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -23,17 +20,13 @@ import static com.jani.houses.OffersProvider.GRATKA;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest
-class GratkaProvidersTest {
+class OfferProvidersTest {
 
     @Value("classpath:basicExtractTeasersTest.html")
     private Resource basicExtractTeasersTestResource;
 
     @Value("classpath:gratkaProviderTest.html")
     private Resource gratkaProviderTestResource;
-
-    @Autowired
-    private OfferRepository offerRepository;
 
     private static final int BASIC_TEASER_NUMBER = 3;
     private static final int TEASER_NUMBER = 32;
@@ -64,11 +57,6 @@ class GratkaProvidersTest {
 
         assertThat(maxPageIndex)
             .contains(MAX_PAGE_INDEX);
-    }
-
-    @Test
-    void persistNewOffersEmptyDatabase() {
-
     }
 
     private String loadHtml(Resource extractTeasersHtml) throws IOException {
