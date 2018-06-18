@@ -65,7 +65,7 @@ class OffersProcessor {
 
         List(OffersProvider.values())
             .flatMap(this::teaserListFromProvider)
-            .map(teasers -> teasers.map(teaser ->  offer(teaser.id(), teaser.title(), teaser.url(), now, now)))
+            .map(teasers -> teasers.map(teaser -> offer(teaser.id(), teaser.title(), teaser.url(), now, now)))
             .forEach(offerRepository::insertOrUpdateOffers);
 
         newOffers()

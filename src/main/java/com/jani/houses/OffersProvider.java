@@ -13,7 +13,7 @@ import java.util.function.Predicate;
 
 import static io.vavr.API.Try;
 
-enum OffersProvider {
+public enum OffersProvider {
 
     GRATKA("https://gratka.pl/nieruchomosci/domy?rodzaj-ogloszenia=sprzedaz&lokalizacja_region=%C5%82%C3%B3dzkie" +
         "&lokalizacja_miejscowosc=lodz&lokalizacja_dzielnica=polesie&page=") {
@@ -39,7 +39,7 @@ enum OffersProvider {
         }
 
         @Override
-        Stream<Teaser> extractTeasersFromPage(Document page) {
+        public Stream<Teaser> extractTeasersFromPage(Document page) {
             return Stream.ofAll(page.select(A_TEASER_CLASS).stream())
                 .map(this::createTeaser);
         }
@@ -74,7 +74,7 @@ enum OffersProvider {
         }
 
         @Override
-        Stream<Teaser> extractTeasersFromPage(Document page) {
+        public Stream<Teaser> extractTeasersFromPage(Document page) {
             return Stream.ofAll(page.select(ARTICLE_OFFER_ITEM_CLASS).stream())
                 .map(this::createTeaser);
         }
@@ -110,7 +110,7 @@ enum OffersProvider {
         }
 
         @Override
-        Stream<Teaser> extractTeasersFromPage(Document page) {
+        public Stream<Teaser> extractTeasersFromPage(Document page) {
             return Stream.ofAll(
                 page
                     .select(TABLE_OFFERS)
@@ -164,7 +164,7 @@ enum OffersProvider {
 
     abstract Option<Integer> maxPageIndex(Document mainPage);
 
-    abstract Stream<Teaser> extractTeasersFromPage(Document page);
+    public abstract Stream<Teaser> extractTeasersFromPage(Document page);
 }
 
 

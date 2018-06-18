@@ -16,13 +16,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
+import static com.jani.houses.LoadHtml.loadHtml;
 import static com.jani.houses.OffersProvider.GRATKA;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 class OfferProvidersTest {
 
-    @Value("classpath:basicExtractTeasersTest.html")
+    @Value("classpath:basicGratkaExtractTeasersTest.html")
     private Resource basicExtractTeasersTestResource;
 
     @Value("classpath:gratkaProviderTest.html")
@@ -57,11 +58,5 @@ class OfferProvidersTest {
 
         assertThat(maxPageIndex)
             .contains(MAX_PAGE_INDEX);
-    }
-
-    private String loadHtml(Resource extractTeasersHtml) throws IOException {
-        try (InputStream inputStream = extractTeasersHtml.getInputStream()) {
-            return IOUtils.toString(inputStream, Charset.defaultCharset());
-        }
     }
 }
