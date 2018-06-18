@@ -9,12 +9,12 @@ messaging:
   subject: Ogłoszenia domy
   hostname: smtp.poczta.onet.pl
 
-excludes: Złotno,Złotnie,Koziny,Szaserów
+excludes: Złotno,Złotnie,Koziny,Szaserów,Rąbień
 
 spring:
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:testdb;
   jpa:
     hibernate:
       ddl-auto: create-drop

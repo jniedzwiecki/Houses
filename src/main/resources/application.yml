@@ -9,7 +9,7 @@ messaging:
   subject: Ogłoszenia domy
   hostname: smtp.poczta.onet.pl
 
-excludes: Złotno,Złotnie,Koziny,Szaserów
+excludes: Złotno,Złotnie,Koziny,Szaserów,Rąbień
 
 spring:
   jpa:
