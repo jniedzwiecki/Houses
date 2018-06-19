@@ -57,7 +57,7 @@ public enum OffersProvider {
 
         private static final String LI_PAGER_COUNTER_CLASS = "li[class=pager-counter]";
         private static final String STRONG_CURRENT_CLASS = STRONG + "[class=current]";
-        private static final String ARTICLE_OFFER_ITEM_CLASS = "article[class*=offer-item]";
+        private static final String ARTICLE_OFFER_ITEM_CLASS = "article[class^=offer-item]";
         private static final String ANCHOR_WITH_DATA_ID = "a[" + DATA_ID + "]";
         private static final String HEADER_OFFER_DETAILS_CLASS = "header[class=offer-item-header]";
         private static final String SPAN_OFFER_ITEM_TITLE_CLASS = "span[class=offer-item-title]";

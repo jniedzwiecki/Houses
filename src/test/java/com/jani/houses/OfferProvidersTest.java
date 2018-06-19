@@ -3,7 +3,6 @@ package com.jani.houses;
 import com.jani.houses.output.Teaser;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
-import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.Test;
@@ -13,29 +12,36 @@ import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 
 import static com.jani.houses.LoadHtml.loadHtml;
 import static com.jani.houses.OffersProvider.GRATKA;
+import static com.jani.houses.OffersProvider.OTODOM;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 class OfferProvidersTest {
 
     @Value("classpath:basicGratkaExtractTeasersTest.html")
-    private Resource basicExtractTeasersTestResource;
+    private Resource basicGratkaExtractTeasersTestResource;
 
     @Value("classpath:gratkaProviderTest.html")
     private Resource gratkaProviderTestResource;
 
+    @Value("classpath:basicOtodomExtractTeasersTest.html")
+    private Resource basicOtodomExtractTeasersTestResource;
+
+    @Value("classpath:otodomProviderTest.html")
+    private Resource otodomProviderTestResource;
+
     private static final int BASIC_TEASER_NUMBER = 3;
-    private static final int TEASER_NUMBER = 32;
-    private static final int MAX_PAGE_INDEX = 5;
+    private static final int GRATKA_TEASER_NUMBER = 32;
+    private static final int OTODOM_TEASER_NUMBER = 31;
+    private static final int GRATKA_MAX_PAGE_INDEX = 5;
+    private static final int OTODOM_MAX_PAGE_INDEX = 4;
 
     @Test
-    void basicExtractTeasersTest() throws IOException {
-        Document document = Jsoup.parse(loadHtml(basicExtractTeasersTestResource));
+    void gratkaBasicExtractTeasersTest() throws IOException {
+        Document document = Jsoup.parse(loadHtml(basicGratkaExtractTeasersTestResource));
         Stream<Teaser> teasers = GRATKA.extractTeasersFromPage(document);
 
         assertThat(teasers)
@@ -43,20 +49,47 @@ class OfferProvidersTest {
     }
 
     @Test
-    void extractTeasersTest() throws IOException {
+    void gratkaExtractTeasersTest() throws IOException {
         Document document = Jsoup.parse(loadHtml(gratkaProviderTestResource));
         Stream<Teaser> teasers = GRATKA.extractTeasersFromPage(document);
 
         assertThat(teasers)
-            .hasSize(TEASER_NUMBER);
+            .hasSize(GRATKA_TEASER_NUMBER);
     }
 
     @Test
-    void maxPageNumberTest() throws IOException {
+    void gratkaMaxPageNumberTest() throws IOException {
         Document document = Jsoup.parse(loadHtml(gratkaProviderTestResource));
         Option<Integer> maxPageIndex = GRATKA.maxPageIndex(document);
 
         assertThat(maxPageIndex)
-            .contains(MAX_PAGE_INDEX);
+            .contains(GRATKA_MAX_PAGE_INDEX);
+    }
+
+    @Test
+    void otodomBasicExtractTeasersTest() throws IOException {
+        Document document = Jsoup.parse(loadHtml(basicOtodomExtractTeasersTestResource));
+        Stream<Teaser> teasers = OTODOM.extractTeasersFromPage(document);
+
+        assertThat(teasers)
+            .hasSize(BASIC_TEASER_NUMBER);
+    }
+
+    @Test
+    void otodomExtractTeasersTest() throws IOException {
+        Document document = Jsoup.parse(loadHtml(otodomProviderTestResource));
+        Stream<Teaser> teasers = OTODOM.extractTeasersFromPage(document);
+
+        assertThat(teasers)
+            .hasSize(OTODOM_TEASER_NUMBER);
+    }
+
+    @Test
+    void otodomMaxPageNumberTest() throws IOException {
+        Document document = Jsoup.parse(loadHtml(otodomProviderTestResource));
+        Option<Integer> maxPageIndex = OTODOM.maxPageIndex(document);
+
+        assertThat(maxPageIndex)
+            .contains(OTODOM_MAX_PAGE_INDEX);
     }
 }

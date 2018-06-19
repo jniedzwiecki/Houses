@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
-class RealDataOfferRepositoryTest {
+class GratkaRealDataOfferRepositoryTest {
 
     private static final String NEW_OFFER_ID = "offer-2961833";
     private static final String NEW_OFFER_TITLE = "Dom Łódź Polesie, ul. Stare Złotno 83";
