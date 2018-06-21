@@ -93,6 +93,7 @@ public class Offer {
             if (price.length() > 0) {
                 resetUpdates();
             }
+            title = title + String.format(" (zmiana ceny z %s na %s)", price, newOffer.price);
             price = newOffer.price;
         }
         updateTime = now;
