@@ -23,19 +23,21 @@ class OfferRepositoryTest {
     private static final String OFFER_2_TITLE = "offer2Title";
     private static final String OFFER_1_URL = "http://provider.com/offer0001";
     private static final String OFFER_2_URL = "http://provider.com/offer0002";
+    private static final String OFFER_1_PRICE = "100";
+    private static final String OFFER_2_PRICE = "200";
 
     private static final Supplier<Offer> FIRST_OFFER =
-        () -> offer(OFFER_1_ID, OFFER_1_TITLE, OFFER_1_URL, LocalDateTime.now(), LocalDateTime.now());
+        () -> offer(OFFER_1_ID, OFFER_1_TITLE, OFFER_1_PRICE, OFFER_1_URL, LocalDateTime.now(), LocalDateTime.now());
 
     private static final Supplier<Offer> SECOND_OFFER =
-        () -> offer(OFFER_2_ID, OFFER_2_TITLE, OFFER_2_URL, LocalDateTime.now(), LocalDateTime.now());
+        () -> offer(OFFER_2_ID, OFFER_2_TITLE, OFFER_2_PRICE, OFFER_2_URL, LocalDateTime.now(), LocalDateTime.now());
 
     @Autowired
     private OfferRepository offerRepository;
 
     @Test
     void queryForNewOffersReturnsNoOffersWhenRepositoryEmpty() {
-        assertThat(offerRepository.queryInsertedOffers())
+        assertThat(offerRepository.queryInsertedOrUpdatedOffers())
             .isEmpty();
     }
 
@@ -43,11 +45,11 @@ class OfferRepositoryTest {
     void queryForNewOffersReturnsOneOfferWhenOneNewOfferInRepository() {
         offerRepository.insertOrUpdateOffers(List(FIRST_OFFER.get()));
 
-        assertThat(offerRepository.queryInsertedOffers().toJavaList())
+        assertThat(offerRepository.queryInsertedOrUpdatedOffers().toJavaList())
             .hasSize(1)
             .first()
-            .extracting(Offer::id, Offer::title, Offer::url)
-            .contains(OFFER_1_ID, OFFER_1_TITLE, OFFER_1_URL);
+            .extracting(Offer::id, Offer::title, Offer::price, Offer::url)
+            .contains(OFFER_1_ID, OFFER_1_TITLE, OFFER_1_PRICE, OFFER_1_URL);
     }
 
     @Test
@@ -55,7 +57,7 @@ class OfferRepositoryTest {
         offerRepository.insertOrUpdateOffers(List(FIRST_OFFER.get()));
         offerRepository.insertOrUpdateOffers(List(FIRST_OFFER.get()));
 
-        assertThat(offerRepository.queryInsertedOffers())
+        assertThat(offerRepository.queryInsertedOrUpdatedOffers())
             .isEmpty();
     }
 
@@ -65,11 +67,11 @@ class OfferRepositoryTest {
         offerRepository.insertOrUpdateOffers(List(SECOND_OFFER.get()));
         offerRepository.insertOrUpdateOffers(List(SECOND_OFFER.get()));
 
-        assertThat(offerRepository.queryInsertedOffers())
+        assertThat(offerRepository.queryInsertedOrUpdatedOffers())
             .hasSize(1)
             .first()
-            .extracting(Offer::id, Offer::title, Offer::url)
-            .contains(OFFER_1_ID, OFFER_1_TITLE, OFFER_1_URL);
+            .extracting(Offer::id, Offer::title, Offer::price, Offer::url)
+            .contains(OFFER_1_ID, OFFER_1_TITLE, OFFER_1_PRICE, OFFER_1_URL);
     }
 
     @Test
@@ -78,10 +80,10 @@ class OfferRepositoryTest {
         offerRepository.insertOrUpdateOffers(List(FIRST_OFFER.get()));
         offerRepository.insertOrUpdateOffers(List(SECOND_OFFER.get()));
 
-        assertThat(offerRepository.queryInsertedOffers())
+        assertThat(offerRepository.queryInsertedOrUpdatedOffers())
             .hasSize(1)
             .first()
-            .extracting(Offer::id, Offer::title, Offer::url)
-            .contains(OFFER_2_ID, OFFER_2_TITLE, OFFER_2_URL);
+            .extracting(Offer::id, Offer::title, Offer::price, Offer::url)
+            .contains(OFFER_2_ID, OFFER_2_TITLE, OFFER_2_PRICE, OFFER_2_URL);
     }
 }

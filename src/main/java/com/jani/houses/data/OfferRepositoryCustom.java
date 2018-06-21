@@ -4,5 +4,5 @@ import io.vavr.collection.List;
 
 public interface OfferRepositoryCustom {
     void insertOrUpdateOffers(List<Offer> offers);
-    List<Offer> queryInsertedOffers();
+    List<Offer> queryInsertedOrUpdatedOffers();
 }

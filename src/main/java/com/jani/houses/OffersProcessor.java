@@ -5,7 +5,6 @@ import com.jani.houses.data.OfferRepository;
 import com.jani.houses.output.Teaser;
 import com.jani.houses.properties.ApplicationProperties;
 import com.jani.houses.properties.ModifiableApplicationProperties;
-import io.vavr.API;
 import io.vavr.Function1;
 import io.vavr.Tuple2;
 import io.vavr.collection.List;
@@ -25,9 +24,6 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.function.Predicate;
 
-import static com.jani.houses.OffersProvider.GRATKA;
-import static com.jani.houses.OffersProvider.OLX;
-import static com.jani.houses.OffersProvider.OTODOM;
 import static com.jani.houses.data.Offer.offer;
 import static io.vavr.API.List;
 import static io.vavr.API.Option;
@@ -65,10 +61,12 @@ class OffersProcessor {
 
         List(OffersProvider.values())
             .flatMap(this::teaserListFromProvider)
-            .map(teasers -> teasers.map(teaser -> offer(teaser.id(), teaser.title(), teaser.url(), now, now)))
+            .map(teasers -> teasers.map(teaser ->
+                offer(teaser.id(), teaser.title(), teaser.price(), teaser.url(), now, now))
+            )
             .forEach(offerRepository::insertOrUpdateOffers);
 
-        newOffers()
+        newOrUpdatedOffers()
             .onEmpty(() -> logger.info(NO_NEW_CONTENT))
             .map(this::createEmailWithTeasers);
 //            .map(email ->
@@ -103,8 +101,8 @@ class OffersProcessor {
             .toOption();
     }
 
-    private Option<List<Offer>> newOffers() {
-        return Option(offerRepository.queryInsertedOffers())
+    private Option<List<Offer>> newOrUpdatedOffers() {
+        return Option(offerRepository.queryInsertedOrUpdatedOffers())
             .filter(List::nonEmpty);
     }
 

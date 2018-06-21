@@ -6,6 +6,7 @@ import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,9 +46,11 @@ public enum OffersProvider {
         }
 
         ImmutableTeaser createTeaser(Element teaserElement) {
+            String html = teaserElement.select("p[class=teaser__price]").html();
             return ImmutableTeaser.builder()
                 .id(teaserElement.attr(ID))
                 .title(teaserElement.attr(TITLE))
+                .price(html.substring(0, html.indexOf("<span>")).trim())
                 .url(teaserElement.attr(HREF))
                 .build();
         }
@@ -61,6 +64,7 @@ public enum OffersProvider {
         private static final String ANCHOR_WITH_DATA_ID = "a[" + DATA_ID + "]";
         private static final String HEADER_OFFER_DETAILS_CLASS = "header[class=offer-item-header]";
         private static final String SPAN_OFFER_ITEM_TITLE_CLASS = "span[class=offer-item-title]";
+        private static final String LI_OFFER_ITEM_PRICE = "li[class=offer-item-price]";
 
         @Override
         Option<Integer> maxPageIndex(Document mainPage) {
@@ -84,6 +88,7 @@ public enum OffersProvider {
             return ImmutableTeaser.builder()
                 .id(teaserElement.select(ANCHOR_WITH_DATA_ID).attr(DATA_ID))
                 .title(anchorObserved.select(SPAN_OFFER_ITEM_TITLE_CLASS).text())
+                .price(teaserElement.select(LI_OFFER_ITEM_PRICE).first().text().trim())
                 .url(anchorObserved.attr(HREF))
                 .build();
         }
@@ -96,6 +101,7 @@ public enum OffersProvider {
         private static final String TABLE_OFFERS = "table[id=offers_table]";
         private static final String TABLE_DATA_ID_INSIDE_TD_CLASS_OFFER = "td[class^=offer] table[data-id]";
         private static final String DIV_SPACE_REL_CLASS = "div[class=space rel]";
+        private static final String STRONG_INSIDE_P_PRICE_CLASS = "p[class=price] strong";
 
         @Override
         Option<Integer> maxPageIndex(Document mainPage) {
@@ -122,10 +128,14 @@ public enum OffersProvider {
         }
 
         ImmutableTeaser createTeaser(Element teaserElement) {
-            Element titleAndUrlAnchor = teaserElement.select(DIV_SPACE_REL_CLASS).select(ANCHOR).first();
+            Elements divSpaceRelClass = teaserElement.select(DIV_SPACE_REL_CLASS);
+            Element titleAndUrlAnchor = divSpaceRelClass.select(ANCHOR).first();
+            Element priceParagraph = teaserElement.select(STRONG_INSIDE_P_PRICE_CLASS).first();
+
             return ImmutableTeaser.builder()
                 .id(teaserElement.attr(DATA_ID))
                 .title(titleAndUrlAnchor.select(STRONG).text())
+                .price(priceParagraph.text())
                 .url(titleAndUrlAnchor.attr(HREF))
                 .build();
         }

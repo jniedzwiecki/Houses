@@ -35,7 +35,7 @@ public class OfferRepositoryImpl implements OfferRepositoryCustom {
     }
 
     @Override
-    public List<Offer> queryInsertedOffers() {
+    public List<Offer> queryInsertedOrUpdatedOffers() {
         logger.info("Querying teasers.");
 
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -43,7 +43,6 @@ public class OfferRepositoryImpl implements OfferRepositoryCustom {
         Root<Offer> rootOffer = criteriaQuery.from(Offer.class);
         CriteriaQuery<Offer> allOffers = criteriaQuery.select(rootOffer);
         TypedQuery<Offer> query = entityManager.createQuery(allOffers);
-
 
         return Stream.ofAll(query.getResultList())
             .filter(offer -> offer.updates() == 0)
@@ -53,6 +52,6 @@ public class OfferRepositoryImpl implements OfferRepositoryCustom {
     private void persistOrUpdate(Offer offer) {
         API.Option(entityManager.find(Offer.class, offer.id()))
             .onEmpty(() -> entityManager.persist(offer))
-            .forEach(existingOffer -> existingOffer.refreshUpdate(LocalDateTime.now()));
+            .forEach(existingOffer -> existingOffer.update(offer, LocalDateTime.now()));
     }
 }

@@ -22,31 +22,13 @@ public class Offer {
     @Transient
     private Logger logger = LoggerFactory.getLogger(Offer.class);
 
-    public static Offer offer(
-        String id,
-        String title,
-        String url,
-        LocalDateTime insertionTime,
-        LocalDateTime updateTime) {
-        return new Offer(id, title, url, insertionTime, updateTime, NO_UPDATES);
-    }
-
-    private Offer(String id, String title, String url, LocalDateTime insertionTime, LocalDateTime updateTime, int updates) {
-        this.id = id;
-        this.title = title;
-        this.insertionTime = insertionTime;
-        this.updateTime = updateTime;
-        this.url = url;
-        this.updates = updates;
-    }
-
-    public Offer() { }
-
     @Id
     @Column(length = 50)
     private String id;
 
     private String title;
+
+    private String price;
 
     private String url;
 
@@ -55,6 +37,29 @@ public class Offer {
     private LocalDateTime updateTime;
 
     private int updates;
+
+    public static Offer offer(
+        String id,
+        String title,
+        String price,
+        String url,
+        LocalDateTime insertionTime,
+        LocalDateTime updateTime) {
+        return new Offer(id, title, price, url, insertionTime, updateTime, NO_UPDATES);
+    }
+
+    private Offer(
+        String id, String title, String price, String url, LocalDateTime insertionTime, LocalDateTime updateTime, int updates) {
+        this.id = id;
+        this.title = title;
+        this.price = price;
+        this.insertionTime = insertionTime;
+        this.updateTime = updateTime;
+        this.url = url;
+        this.updates = updates;
+    }
+
+    public Offer() { }
 
     public Option<Tuple2<URL, String>> toEmailContent() {
         Option<URL> url = Try(() -> new URL(url())).onFailure(this::error).toOption();
@@ -69,6 +74,10 @@ public class Offer {
         return title;
     }
 
+    String price() {
+        return price;
+    }
+
     String url() {
         return url;
     }
@@ -77,9 +86,22 @@ public class Offer {
         return updates;
     }
 
-    void refreshUpdate(LocalDateTime now) {
+    void update(Offer newOffer, LocalDateTime now) {
+        if (price.equals(newOffer.price)) {
+            refreshUpdates();
+        } else {
+            price = newOffer.price;
+            resetUpdates();
+        }
         updateTime = now;
+    }
+
+    private void refreshUpdates() {
         updates++;
+    }
+
+    private void resetUpdates() {
+        updates = 0;
     }
 
     private void error(Throwable throwable) {
