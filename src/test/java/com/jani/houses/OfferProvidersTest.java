@@ -15,6 +15,7 @@ import java.io.IOException;
 
 import static com.jani.houses.LoadHtml.loadHtml;
 import static com.jani.houses.OffersProvider.GRATKA;
+import static com.jani.houses.OffersProvider.OLX;
 import static com.jani.houses.OffersProvider.OTODOM;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,9 +34,16 @@ class OfferProvidersTest {
     @Value("classpath:otodomProviderTest.html")
     private Resource otodomProviderTestResource;
 
+    @Value("classpath:basicOlxExtractTeasersTest.html")
+    private Resource basicOlxExtractTeasersTestResource;
+
+    @Value("classpath:olxProviderTest.html")
+    private Resource olxProviderTestResource;
+
     private static final int BASIC_TEASER_NUMBER = 3;
     private static final int GRATKA_TEASER_NUMBER = 32;
     private static final int OTODOM_TEASER_NUMBER = 31;
+    private static final int OLX_TEASER_NUMBER = 28;
     private static final int GRATKA_MAX_PAGE_INDEX = 5;
     private static final int OTODOM_MAX_PAGE_INDEX = 4;
 
@@ -91,5 +99,32 @@ class OfferProvidersTest {
 
         assertThat(maxPageIndex)
             .contains(OTODOM_MAX_PAGE_INDEX);
+    }
+
+    @Test
+    void olxBasicExtractTeasersTest() throws IOException {
+        Document document = Jsoup.parse(loadHtml(basicOlxExtractTeasersTestResource));
+        Stream<Teaser> teasers = OLX.extractTeasersFromPage(document);
+
+        assertThat(teasers)
+            .hasSize(BASIC_TEASER_NUMBER);
+    }
+
+    @Test
+    void olxExtractTeasersTest() throws IOException {
+        Document document = Jsoup.parse(loadHtml(olxProviderTestResource));
+        Stream<Teaser> teasers = OLX.extractTeasersFromPage(document);
+
+        assertThat(teasers)
+            .hasSize(OLX_TEASER_NUMBER);
+    }
+
+    @Test
+    void olxMaxPageNumberTest() throws IOException {
+        Document document = Jsoup.parse(loadHtml(olxProviderTestResource));
+        Option<Integer> maxPageIndex = OLX.maxPageIndex(document);
+
+        assertThat(maxPageIndex)
+            .isEmpty();
     }
 }
