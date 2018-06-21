@@ -68,10 +68,10 @@ class OffersProcessor {
 
         newOrUpdatedOffers()
             .onEmpty(() -> logger.info(NO_NEW_CONTENT))
-            .map(this::createEmailWithTeasers);
-//            .map(email ->
-//                Try(email::send)
-//                    .onFailure(this::error));
+            .map(this::createEmailWithTeasers)
+            .map(email ->
+                Try(email::send)
+                    .onFailure(this::error));
     }
 
     private Option<List<Teaser>> teaserListFromProvider(OffersProvider offerProvider) {

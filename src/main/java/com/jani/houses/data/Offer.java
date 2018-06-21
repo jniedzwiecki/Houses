@@ -90,8 +90,10 @@ public class Offer {
         if (price.equals(newOffer.price)) {
             refreshUpdates();
         } else {
+            if (price.length() > 0) {
+                resetUpdates();
+            }
             price = newOffer.price;
-            resetUpdates();
         }
         updateTime = now;
     }
