@@ -2,6 +2,7 @@ package com.jani.houses.data;
 
 import io.vavr.Tuple2;
 import io.vavr.control.Option;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 
 import static io.vavr.API.Try;
 import static io.vavr.API.Tuple;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Entity
 public class Offer {
@@ -87,13 +89,13 @@ public class Offer {
     }
 
     void update(Offer newOffer, LocalDateTime now) {
-        if (price.equals(newOffer.price)) {
+        if (StringUtils.equals(price, newOffer.price)) {
             refreshUpdates();
         } else {
-            if (price.length() > 0) {
+            if (isNotEmpty(price)) {
                 resetUpdates();
             }
-            title = title + String.format(" (zmiana ceny z %s na %s)", price, newOffer.price);
+            title = priceChangedTitle(newOffer);
             price = newOffer.price;
         }
         updateTime = now;
@@ -105,6 +107,10 @@ public class Offer {
 
     private void resetUpdates() {
         updates = 0;
+    }
+
+    private String priceChangedTitle(Offer newOffer) {
+        return title + String.format(" (zmiana ceny z %s na %s)", price, newOffer.price);
     }
 
     private void error(Throwable throwable) {
