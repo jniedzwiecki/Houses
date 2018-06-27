@@ -9,7 +9,9 @@ enum UpdateType {
     NO_UPDATE(StringUtils.EMPTY) {
         @Override
         public UpdateInfo updateInfo(String... values) {
-            throw new IllegalStateException("No message to complete");
+            return ImmutableUpdateInfo.builder()
+                .updated(false)
+                .build();
         }
     },
 

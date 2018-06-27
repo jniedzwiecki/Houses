@@ -30,6 +30,7 @@ class GratkaRealDataOfferRepositoryTest {
         "https://gratka.pl/nieruchomosci/dom-lodz-polesie-ul-stare-zlotno-83/oi/2961833";
 
     private static final String ORIGINAL_OFFER_ID = "offer-4121411";
+    private static final String ORIGINAL_OFFER_TITLE = "Dom na ";
     private static final String UPDATED_OFFER_TITLE = "Dom na  (zmiana ceny z 750 000 na 100 000)";
     private static final String ORIGINAL_OFFER_URL = "https://gratka.pl/nieruchomosci/dom-na-zdrowiu-z-duza-dzialka/oi/4121411";
     private static final String NEW_PRICE = "100 000";
@@ -66,8 +67,13 @@ class GratkaRealDataOfferRepositoryTest {
         assertThat(offerRepository.queryInsertedOrUpdatedOffers().toJavaList())
             .hasSize(1)
             .first()
-            .extracting(Offer::id, Offer::title, Offer::price, Offer::url)
-            .contains(ORIGINAL_OFFER_ID, UPDATED_OFFER_TITLE, NEW_PRICE, ORIGINAL_OFFER_URL);
+            .extracting(Offer::id, Offer::title, Offer::price, Offer::url, Offer::updateInfo)
+            .contains(ORIGINAL_OFFER_ID, ORIGINAL_OFFER_TITLE, NEW_PRICE, ORIGINAL_OFFER_URL,
+                ImmutableUpdateInfo.builder()
+                    .title(UPDATED_OFFER_TITLE)
+                    .updated(true)
+                    .build()
+            );
     }
 
     private void insertOrUpdateOffersFromDocument(Resource html, OffersProvider offersProvider) throws IOException {

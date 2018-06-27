@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Transient;
@@ -33,6 +34,7 @@ public class Offer {
 
     private String url;
 
+    @Embedded
     private UpdateInfo updateInfo;
 
     private LocalDateTime insertionTime;
@@ -69,7 +71,7 @@ public class Offer {
 
     public Option<Tuple2<URL, String>> toEmailContent() {
         Option<URL> url = Try(() -> new URL(url())).onFailure(this::error).toOption();
-        return url.map(u -> Tuple(u, title()));
+        return url.map(u -> Tuple(u, updateInfo.title()));
     }
 
     String id() {
@@ -101,6 +103,8 @@ public class Offer {
         if (priceUpdated(updatedOffer)) {
             updateInfo = UpdateType.PRICE_CHANGE.updateInfo(title, price, updatedOffer.price);
             price = updatedOffer.price;
+        } else {
+            updateInfo = UpdateType.NO_UPDATE.updateInfo();
         }
         refreshUpdateTime();
     }
@@ -110,7 +114,7 @@ public class Offer {
     }
 
     private boolean priceUpdated(Offer updatedOffer) {
-        return StringUtils.equals(price, updatedOffer.price);
+        return StringUtils.compare(price, updatedOffer.price) != 0;
     }
 
     private void refreshUpdateTime() {
