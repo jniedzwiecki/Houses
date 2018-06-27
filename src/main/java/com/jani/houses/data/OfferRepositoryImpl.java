@@ -1,6 +1,5 @@
 package com.jani.houses.data;
 
-import io.vavr.API;
 import io.vavr.collection.List;
 import io.vavr.collection.Stream;
 import org.slf4j.Logger;
@@ -12,12 +11,13 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import java.time.LocalDateTime;
+
+import static io.vavr.API.Option;
 
 @Transactional
 public class OfferRepositoryImpl implements OfferRepositoryCustom {
 
-    static final Logger logger = LoggerFactory.getLogger(OfferRepository.class);
+    private static final Logger logger = LoggerFactory.getLogger(OfferRepository.class);
 
     private final EntityManager entityManager;
 
@@ -45,13 +45,17 @@ public class OfferRepositoryImpl implements OfferRepositoryCustom {
         TypedQuery<Offer> query = entityManager.createQuery(allOffers);
 
         return Stream.ofAll(query.getResultList())
-            .filter(offer -> offer.updates() == 0)
+            .filter(offer -> offer.updateInfo().updated())
             .toList();
     }
 
     private void persistOrUpdate(Offer offer) {
-        API.Option(entityManager.find(Offer.class, offer.id()))
-            .onEmpty(() -> entityManager.persist(offer))
-            .forEach(existingOffer -> existingOffer.update(offer, LocalDateTime.now()));
+        Option(entityManager.find(Offer.class, offer.id()))
+            .onEmpty(() ->
+                entityManager
+                    .persist(offer.prepareForPersisting())
+            )
+            .forEach(existingOffer ->
+                existingOffer.performUpdate(offer));
     }
 }

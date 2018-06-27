@@ -13,13 +13,12 @@ import javax.persistence.Transient;
 import java.net.URL;
 import java.time.LocalDateTime;
 
+import static com.jani.houses.data.UpdateType.NEW_OFFER;
 import static io.vavr.API.Try;
 import static io.vavr.API.Tuple;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Entity
 public class Offer {
-    private static final int NO_UPDATES = 0;
 
     @Transient
     private Logger logger = LoggerFactory.getLogger(Offer.class);
@@ -34,11 +33,11 @@ public class Offer {
 
     private String url;
 
+    private UpdateInfo updateInfo;
+
     private LocalDateTime insertionTime;
 
     private LocalDateTime updateTime;
-
-    private int updates;
 
     public static Offer offer(
         String id,
@@ -47,18 +46,23 @@ public class Offer {
         String url,
         LocalDateTime insertionTime,
         LocalDateTime updateTime) {
-        return new Offer(id, title, price, url, insertionTime, updateTime, NO_UPDATES);
+        return new Offer(id, title, price, url, insertionTime, updateTime);
     }
 
     private Offer(
-        String id, String title, String price, String url, LocalDateTime insertionTime, LocalDateTime updateTime, int updates) {
+        String id,
+        String title,
+        String price,
+        String url,
+        LocalDateTime insertionTime,
+        LocalDateTime updateTime
+    ) {
         this.id = id;
         this.title = title;
         this.price = price;
         this.insertionTime = insertionTime;
         this.updateTime = updateTime;
         this.url = url;
-        this.updates = updates;
     }
 
     public Offer() { }
@@ -84,36 +88,32 @@ public class Offer {
         return url;
     }
 
-    int updates() {
-        return updates;
+    UpdateInfo updateInfo() {
+        return updateInfo;
     }
 
-    void update(Offer newOffer, LocalDateTime now) {
-        if (StringUtils.equals(price, newOffer.price)) {
-            refreshUpdates();
-        } else {
-            if (isNotEmpty(price)) {
-                resetUpdates();
-            }
-            title = priceChangedTitle(newOffer);
-            price = newOffer.price;
+    Offer prepareForPersisting() {
+        updateInfo = NEW_OFFER.updateInfo(title);
+        return this;
+    }
+
+    void performUpdate(Offer updatedOffer) {
+        if (priceUpdated(updatedOffer)) {
+            updateInfo = UpdateType.PRICE_CHANGE.updateInfo(title, price, updatedOffer.price);
+            price = updatedOffer.price;
         }
-        updateTime = now;
-    }
-
-    private void refreshUpdates() {
-        updates++;
-    }
-
-    private void resetUpdates() {
-        updates = 0;
-    }
-
-    private String priceChangedTitle(Offer newOffer) {
-        return title + String.format(" (zmiana ceny z %s na %s)", price, newOffer.price);
+        refreshUpdateTime();
     }
 
     private void error(Throwable throwable) {
         logger.error(throwable.getMessage(), throwable);
+    }
+
+    private boolean priceUpdated(Offer updatedOffer) {
+        return StringUtils.equals(price, updatedOffer.price);
+    }
+
+    private void refreshUpdateTime() {
+        updateTime = LocalDateTime.now();
     }
 }
