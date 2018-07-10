@@ -15,6 +15,7 @@ import java.io.IOException;
 
 import static com.jani.houses.LoadHtml.loadHtml;
 import static com.jani.houses.OffersProvider.GRATKA;
+import static com.jani.houses.OffersProvider.MORIZON;
 import static com.jani.houses.OffersProvider.OLX;
 import static com.jani.houses.OffersProvider.OTODOM;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,12 +41,16 @@ class OfferProvidersTest {
     @Value("classpath:olxProviderTest.html")
     private Resource olxProviderTestResource;
 
+    @Value("classpath:morizonProviderTest.html")
+    private Resource morizonProviderTestResource;
+
     private static final int BASIC_TEASER_NUMBER = 3;
     private static final int GRATKA_TEASER_NUMBER = 32;
     private static final int OTODOM_TEASER_NUMBER = 31;
     private static final int OLX_TEASER_NUMBER = 28;
     private static final int GRATKA_MAX_PAGE_INDEX = 5;
     private static final int OTODOM_MAX_PAGE_INDEX = 4;
+    private static final int MORIZON_MAX_PAGE_INDEX = 39;
 
     @Test
     void gratkaBasicExtractTeasersTest() throws IOException {
@@ -126,5 +131,23 @@ class OfferProvidersTest {
 
         assertThat(maxPageIndex)
             .isEmpty();
+    }
+
+    @Test
+    void morizonMaxPageNumberTest() throws IOException {
+        Document document = Jsoup.parse(loadHtml(morizonProviderTestResource));
+        Option<Integer> maxPageIndex = MORIZON.maxPageIndex(document);
+
+        assertThat(maxPageIndex)
+            .contains(3);
+    }
+
+    @Test
+    void morizonExtractTeasersTest() throws IOException {
+        Document document = Jsoup.parse(loadHtml(morizonProviderTestResource));
+        Stream<Teaser> teasers = MORIZON.extractTeasersFromPage(document);
+
+        assertThat(teasers)
+            .hasSize(MORIZON_MAX_PAGE_INDEX);
     }
 }

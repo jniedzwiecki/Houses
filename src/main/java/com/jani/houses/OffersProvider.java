@@ -139,6 +139,40 @@ public enum OffersProvider {
                 .url(titleAndUrlAnchor.attr(HREF))
                 .build();
         }
+    },
+    MORIZON("https://www.morizon.pl/domy/lodz/polesie/?page=") {
+
+        @Override
+        Option<Integer> maxPageIndex(Document mainPage) {
+            return Try(() -> {
+                Elements lis = mainPage
+                    .select("ul[class^=nav nav-pills mz-pagination-number]")
+                    .select("li");
+                Element lastLiWithNumber = lis.get(lis.size() - 2);
+                return lastLiWithNumber
+                    .text();
+            }).toOption()
+                .map(Integer::parseInt);
+        }
+
+        @Override
+        public Stream<Teaser> extractTeasersFromPage(Document page) {
+            return Stream.ofAll(
+                page
+                    .select("div[class=contentBox]")
+                    .select("div[class=row row--property-list]")
+                    .stream()
+            ).map(this::createTeaser);
+        }
+
+        ImmutableTeaser createTeaser(Element teaserElement) {
+            return ImmutableTeaser.builder()
+                .id(teaserElement.attr(DATA_ID))
+                .title(teaserElement.select("h2[class$=__title]").text())
+                .price(teaserElement.select("p[class$=__price]").text())
+                .url(teaserElement.select("a[href=property_link]").attr("href"))
+                .build();
+        }
     };
 
     static final String HREF = "href";
