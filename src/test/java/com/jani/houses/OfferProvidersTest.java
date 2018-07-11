@@ -50,7 +50,7 @@ class OfferProvidersTest {
     private static final int OLX_TEASER_NUMBER = 28;
     private static final int GRATKA_MAX_PAGE_INDEX = 5;
     private static final int OTODOM_MAX_PAGE_INDEX = 4;
-    private static final int MORIZON_MAX_PAGE_INDEX = 39;
+    private static final int MORIZON_TEASER_NUMBER = 35;
 
     @Test
     void gratkaBasicExtractTeasersTest() throws IOException {
@@ -148,6 +148,6 @@ class OfferProvidersTest {
         Stream<Teaser> teasers = MORIZON.extractTeasersFromPage(document);
 
         assertThat(teasers)
-            .hasSize(MORIZON_MAX_PAGE_INDEX);
+            .hasSize(MORIZON_TEASER_NUMBER);
     }
 }

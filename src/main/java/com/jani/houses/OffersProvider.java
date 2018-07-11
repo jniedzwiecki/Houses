@@ -160,7 +160,7 @@ public enum OffersProvider {
             return Stream.ofAll(
                 page
                     .select("div[class=contentBox]")
-                    .select("div[class=row row--property-list]")
+                    .select("div[class*=row row--property-list][data-id]")
                     .stream()
             ).map(this::createTeaser);
         }

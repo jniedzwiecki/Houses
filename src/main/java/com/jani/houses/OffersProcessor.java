@@ -66,12 +66,12 @@ class OffersProcessor {
             )
             .forEach(offerRepository::insertOrUpdateOffers);
 
-        newOrUpdatedOffers()
-            .onEmpty(() -> logger.info(NO_NEW_CONTENT))
-            .map(this::createEmailWithTeasers)
-            .map(email ->
-                Try(email::send)
-                    .onFailure(this::error));
+        Option<List<Offer>> lists = newOrUpdatedOffers()
+            .onEmpty(() -> logger.info(NO_NEW_CONTENT));
+//            .map(this::createEmailWithTeasers)
+//            .map(email ->
+//                Try(email::send)
+//                    .onFailure(this::error));
     }
 
     private Option<List<Teaser>> teaserListFromProvider(OffersProvider offerProvider) {
