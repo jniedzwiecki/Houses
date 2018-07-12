@@ -45,8 +45,13 @@ public class OfferRepositoryImpl implements OfferRepositoryCustom {
         TypedQuery<Offer> query = entityManager.createQuery(allOffers);
 
         return Stream.ofAll(query.getResultList())
-            .filter(offer -> offer.updateInfo().updated())
+            .filter(this::offerUpdated)
             .toList();
+    }
+
+    private boolean offerUpdated(Offer offer) {
+        return offer.updateInfo() == null
+            || offer.updateInfo().updated();
     }
 
     private void persistOrUpdate(Offer offer) {

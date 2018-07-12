@@ -71,7 +71,7 @@ public class Offer {
 
     public Option<Tuple2<URL, String>> toEmailContent() {
         Option<URL> url = Try(() -> new URL(url())).onFailure(this::error).toOption();
-        return url.map(u -> Tuple(u, updateInfo.title()));
+        return url.map(u -> Tuple(u, updateInfo.getTitle()));
     }
 
     String id() {
@@ -114,7 +114,8 @@ public class Offer {
     }
 
     private boolean priceUpdated(Offer updatedOffer) {
-        return StringUtils.compare(price, updatedOffer.price) != 0;
+        return price != null
+            && StringUtils.compare(price, updatedOffer.price) != 0;
     }
 
     private void refreshUpdateTime() {
